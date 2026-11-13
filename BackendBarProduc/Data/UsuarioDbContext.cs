@@ -11,6 +11,7 @@ namespace BackendBarProduc.Data
         }
 
         public DbSet<Usuario> Usuarios => Set<Usuario>();
+        public DbSet<Proveedor> Proveedores => Set<Proveedor>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);   // NUEVA: siempre primero 
@@ -22,7 +23,11 @@ namespace BackendBarProduc.Data
                 entity.Property(u => u.Correo).HasMaxLength(100);
                 entity.Property(u => u.Contraseña).HasMaxLength(255);
             });
-
+            modelBuilder.Entity<Proveedor>(entity =>
+            {
+                entity.Property(p => p.Nombre).HasMaxLength(100);
+                entity.Property(p => p.Telefono).HasMaxLength(20);
+            });
         }
     }
 }
