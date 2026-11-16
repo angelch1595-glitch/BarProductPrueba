@@ -1,5 +1,5 @@
 ﻿using BackendBarProduc.Models;
-using BackendBarProduc.Repositories;
+using BackendBarProduc.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,18 +10,18 @@ namespace BackendBarProduc.Controllers
     [Route("api/[controller]")]
     public class UsuarioController : ControllerBase
     {
-        private readonly IRepositorio _repo;
+        private readonly IServicio _servicio;
 
-        public UsuarioController(IRepositorio repo)
+        public UsuarioController(IServicio repo)
         {
-            _repo = repo;
+            _servicio = repo;
         }
 
         // Ver todos los usuarios
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
         {
-            var usuarios = await _repo.ObtenerUsuariosAsync();
+            var usuarios = await _servicio.ObtenerUsuariosAsync();
             return Ok(usuarios);
         }
 
@@ -29,7 +29,7 @@ namespace BackendBarProduc.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Usuario>> GetUsuarioById(int id)
         {
-            var usuario = await _repo.ObtenerUsuarioPorIdAsync(id);
+            var usuario = await _servicio.ObtenerUsuarioPorIdAsync(id);
 
             if (usuario == null)
             {
@@ -44,7 +44,7 @@ namespace BackendBarProduc.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Usuario>> AddUsuario(Usuario usuario)
         {
-            var usuarioCreado = await _repo.CrearUsuarioAsync(usuario);
+            var usuarioCreado = await _servicio.CrearUsuarioAsync(usuario);
 
             return CreatedAtAction(
                 nameof(GetUsuarioById),
@@ -57,7 +57,7 @@ namespace BackendBarProduc.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUsuario(int id)
         {
-            var eliminado = await _repo.EliminarUsuarioAsync(id);
+            var eliminado = await _servicio.EliminarUsuarioAsync(id);
 
             if (!eliminado)
             {
@@ -78,7 +78,7 @@ namespace BackendBarProduc.Controllers
                     "El ID de la URL no coincide con el ID del usuario");
             }
 
-            var actualizado = await _repo.ActualizarUsuarioAsync(usuario);
+            var actualizado = await _servicio.ActualizarUsuarioAsync(usuario);
 
             if (!actualizado)
             {
