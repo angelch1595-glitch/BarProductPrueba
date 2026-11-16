@@ -1,8 +1,10 @@
-using BackendBarProduc.Repositories;
 using BackendBarProduc.Data;
-using Microsoft.EntityFrameworkCore;
+using BackendBarProduc.Models;
+using BackendBarProduc.Repositories;
 using BackendBarProduc.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
@@ -12,6 +14,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<UsuarioDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("BarProducDb")));
+builder.Services
+    .AddIdentityCore<ApplicationUser>(options =>
+    {
+        options.Password.RequiredLength = 8;
+        options.Password.RequireDigit = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = false;
+        options.User.RequireUniqueEmail = true;
+    })
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<UsuarioDbContext>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<IRepositorio,UsuarioRepositorio_SQL>();
@@ -57,6 +71,10 @@ builder.Services.AddSwaggerGen(c =>
 
 // ---------- PIPELINE ---------- 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    await IdentitySeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
+}
 app.UseHttpsRedirection();
 if (app.Environment.IsDevelopment())
 {
